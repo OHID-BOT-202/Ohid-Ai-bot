@@ -4,454 +4,971 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ohid bby Ai</title>
+<title>Ohid AI</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{
-    box-sizing:border-box;
+@font-face{
+  font-family:Kalpana;
+  src:url("Kalpana%20UNICODE.ttf") format("truetype");
 }
+
+*{box-sizing:border-box}
 
 body{
-    margin:0;
-    min-height:100vh;
-    font-family:Arial,"Noto Sans Bengali",sans-serif;
-    background:#101010;
-    color:white;
-    overflow:hidden;
+  margin:0;
+  min-height:100vh;
+  color:#fff;
+  font-family:Kalpana,Arial,sans-serif;
+  background:
+    linear-gradient(#0008,#0008),
+    url("https://i.ibb.co.com/F4nJPjzb/file-000000008e7482118c92ba40bfa3d1fd.png")
+    center/cover fixed;
 }
 
-body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    background:
-        linear-gradient(rgba(0,0,0,.15),rgba(0,0,0,.35)),
-        url("https://i.ibb.co.com/F4nJPjzb/file-000000008e7482118c92ba40bfa3d1fd.png")
-        center/cover no-repeat;
-    z-index:-2;
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+.rgb{
+  border:2px solid transparent;
+  border-image:linear-gradient(
+    90deg,red,orange,yellow,lime,cyan,blue,violet,red
+  ) 1;
+  animation:rgbMove 2s linear infinite;
 }
 
-body::after{
-    content:"";
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.12);
-    z-index:-1;
+@keyframes rgbMove{
+  from{filter:hue-rotate(0deg)}
+  to{filter:hue-rotate(360deg)}
 }
 
-.app{
-    width:100%;
-    max-width:650px;
-    height:100vh;
-    margin:auto;
-    display:flex;
-    flex-direction:column;
-    background:rgba(0,0,0,.12);
-    backdrop-filter:blur(2px);
+.auth-page{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
 }
 
-.header{
-    height:65px;
-    flex-shrink:0;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:10px 15px;
-    background:rgba(0,0,0,.48);
-    border-bottom:1px solid rgba(255,255,255,.12);
+.auth-box{
+  width:100%;
+  max-width:420px;
+  padding:28px;
+  border-radius:24px;
+  background:#080808df;
+  backdrop-filter:blur(16px);
+  box-shadow:0 0 35px #000;
 }
 
-.profile{
-    width:43px;
-    height:43px;
-    border-radius:50%;
-    object-fit:cover;
-    border:2px solid #00ff88;
+.logo{
+  text-align:center;
+  font-size:36px;
+  font-weight:bold;
+  margin-bottom:8px;
+  color:#fff;
+  text-shadow:0 0 12px #00ffff;
 }
 
-.header-info{
-    display:flex;
-    flex-direction:column;
-    gap:3px;
+.subtitle{
+  text-align:center;
+  color:#bbb;
+  margin-bottom:25px;
 }
 
-.header-name{
-    font-size:17px;
-    font-weight:bold;
+.auth-box input{
+  width:100%;
+  padding:14px 16px;
+  margin:8px 0;
+  color:#fff;
+  background:#111;
+  border:1px solid #444;
+  border-radius:12px;
+  outline:none;
 }
 
-.online{
-    color:#00ff88;
-    font-size:12px;
+.auth-box input:focus{
+  border-color:#00ffff;
+}
+
+.main{
+  display:flex;
+  min-height:100vh;
+}
+
+.sidebar{
+  width:280px;
+  padding:16px;
+  background:#050505e8;
+  border-right:1px solid #333;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.side-title{
+  font-size:25px;
+  font-weight:bold;
+  text-align:center;
+  color:#00ffff;
+  text-shadow:0 0 10px #00ffff;
+}
+
+.user-info{
+  padding:12px;
+  border-radius:12px;
+  background:#151515;
+  color:#ddd;
+  font-size:14px;
+  word-break:break-word;
+}
+
+.history-search{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  color:#fff;
+  background:#111;
+  border:1px solid #444;
+  outline:none;
+}
+
+.history{
+  flex:1;
+  overflow-y:auto;
+}
+
+.history-item{
+  padding:12px;
+  margin-bottom:8px;
+  border-radius:10px;
+  background:#171717;
+  color:#ddd;
+  cursor:pointer;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.history-item:hover,
+.history-item.active{
+  background:#073b42;
+  color:#fff;
+}
+
+.chat-area{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:14px 18px;
+  background:#050505b8;
+  border-bottom:1px solid #333;
+}
+
+.topbar-title{
+  font-size:24px;
+  font-weight:bold;
 }
 
 .chat-box{
-    flex:1;
-    overflow-y:auto;
-    padding:18px 12px 115px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    scroll-behavior:smooth;
+  flex:1;
+  overflow-y:auto;
+  padding:22px;
 }
 
-.chat-box::-webkit-scrollbar{
-    width:4px;
-}
-
-.chat-box::-webkit-scrollbar-thumb{
-    background:#00ff88;
-    border-radius:10px;
+.welcome{
+  text-align:center;
+  margin:50px auto;
+  color:#ddd;
 }
 
 .message{
-    display:block;
-    width:fit-content;
-    max-width:88%;
-    min-height:0;
-    height:auto;
-    flex:0 0 auto;
-    padding:10px 13px;
-    border-radius:17px;
-    font-size:15px;
-    line-height:1.5;
-    white-space:pre-wrap;
-    overflow-wrap:anywhere;
-    word-break:break-word;
-    animation:showMessage .2s ease;
-}
-
-@keyframes showMessage{
-    from{
-        opacity:0;
-        transform:translateY(7px);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
+  width:fit-content;
+  max-width:min(850px,100%);
+  margin:12px 0;
+  padding:13px 16px;
+  border-radius:17px;
+  line-height:1.65;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  height:auto;
 }
 
 .message.user{
-    align-self:flex-end;
-    background:rgba(0,125,255,.85);
-    border-bottom-right-radius:4px;
-    box-shadow:0 3px 12px rgba(0,0,0,.2);
+  margin-left:auto;
+  background:#123d42dd;
 }
 
 .message.ai{
-    align-self:flex-start;
-    background:rgba(35,35,35,.88);
-    border:1px solid rgba(0,255,136,.7);
-    border-bottom-left-radius:4px;
-    box-shadow:0 3px 12px rgba(0,0,0,.2);
+  margin-right:auto;
+  background:#171717e8;
 }
 
-.message.system{
-    align-self:center;
-    max-width:95%;
-    padding:7px 12px;
-    border-radius:12px;
-    background:rgba(0,0,0,.5);
-    color:#ddd;
-    font-size:12px;
-    text-align:center;
+.message-name{
+  font-size:12px;
+  color:#00ffff;
+  margin-bottom:5px;
 }
 
-.typing{
-    display:none;
-    align-self:flex-start;
-    padding:10px 14px;
-    border-radius:16px;
-    background:rgba(35,35,35,.9);
-    border:1px solid rgba(0,255,136,.5);
-    color:#00ff88;
-    font-size:13px;
+.composer{
+  padding:14px;
+  background:#050505c9;
+  border-top:1px solid #333;
 }
 
-.typing.show{
-    display:block;
-}
-
-.bottom-area{
-    position:fixed;
-    bottom:0;
-    left:50%;
-    transform:translateX(-50%);
-    width:100%;
-    max-width:650px;
-    padding:10px 10px 12px;
-    background:rgba(0,0,0,.62);
-    backdrop-filter:blur(12px);
-    border-top:1px solid rgba(255,255,255,.12);
-}
-
-.input-row{
-    display:flex;
-    align-items:flex-end;
-    gap:8px;
+.composer-inner{
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  max-width:1000px;
+  margin:auto;
 }
 
 #messageInput{
-    flex:1;
-    min-height:44px;
-    max-height:120px;
-    resize:none;
-    overflow-y:auto;
-    padding:12px 14px;
-    border-radius:22px;
-    border:1px solid rgba(255,255,255,.7);
-    outline:none;
-    background:rgba(0,0,0,.22);
-    color:white;
-    font-family:inherit;
-    font-size:15px;
-    line-height:20px;
-}
-
-#messageInput::placeholder{
-    color:rgba(255,255,255,.65);
+  flex:1;
+  min-width:0;
+  min-height:48px;
+  max-height:150px;
+  resize:none;
+  padding:13px 15px;
+  color:#fff;
+  background:#111;
+  border-radius:15px;
+  outline:none;
 }
 
 #messageInput:focus{
-    border-color:#00ff88;
-    box-shadow:0 0 8px rgba(0,255,136,.35);
+  border-color:#00ffff;
 }
 
-#sendBtn{
-    width:45px;
-    height:45px;
-    flex-shrink:0;
-    border:0;
-    border-radius:50%;
-    background:#00d978;
-    color:#001b0d;
-    font-size:20px;
-    font-weight:bold;
-    cursor:pointer;
-    transition:.2s;
+.btn{
+  border:0;
+  border-radius:12px;
+  padding:12px 16px;
+  color:#fff;
+  background:#123f45;
+  transition:.2s;
 }
 
-#sendBtn:hover{
-    background:#00ff91;
-    transform:scale(1.05);
+.btn:hover{background:#17616b}
+
+.btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
 }
 
-#sendBtn:disabled{
-    opacity:.5;
-    cursor:not-allowed;
+.btn-danger{background:#68222b}
+.btn-danger:hover{background:#912d3b}
+
+.mobile-menu{display:none}
+
+.status{
+  text-align:center;
+  color:#aaa;
+  font-size:13px;
+  padding:7px;
 }
 
-.footer-text{
-    text-align:center;
-    color:rgba(255,255,255,.45);
-    font-size:10px;
-    margin-top:7px;
+@media(max-width:750px){
+  .sidebar{
+    position:fixed;
+    z-index:20;
+    left:-300px;
+    top:0;
+    bottom:0;
+    transition:.25s;
+  }
+
+  .sidebar.open{left:0}
+
+  .mobile-menu{display:block}
+
+  .chat-box{padding:14px}
+
+  .topbar-title{font-size:19px}
+
+  .composer-inner{gap:7px}
+
+  .btn{padding:11px 13px}
 }
 </style>
 </head>
 
 <body>
 
-<div class="app">
+<!-- LOGIN / REGISTER -->
+<section id="authPage" class="auth-page">
+  <div class="auth-box rgb">
+    <div class="logo">Ohid AI</div>
 
-    <header class="header">
-        <img
-            class="profile"
-            src="https://i.ibb.co/G4sHV2cW/20260822-000544.jpg"
-            alt="Profile"
-        >
-
-        <div class="header-info">
-            <div class="header-name">Ohid bby Ai</div>
-            <div class="online">● Online</div>
-        </div>
-    </header>
-
-    <main class="chat-box" id="chatBox">
-        <div class="message ai">
-            আসসালামু আলাইকুম! আমি Ohid bby Ai। তোমার সাথে কথা বলতে প্রস্তুত আছি।
-        </div>
-
-        <div class="typing" id="typing">
-            AI লিখছে...
-        </div>
-    </main>
-
-    <div class="bottom-area">
-        <div class="input-row">
-            <textarea
-                id="messageInput"
-                rows="1"
-                placeholder="মেসেজ লিখুন..."
-            ></textarea>
-
-            <button id="sendBtn" type="button">➤</button>
-        </div>
-
-        <div class="footer-text">
-            Enter = নতুন লাইন • Send বাটন = মেসেজ পাঠানো
-        </div>
+    <div class="subtitle">
+      Login to connect Ohid AI
     </div>
 
-</div>
+    <input
+      id="email"
+      type="email"
+      placeholder="Email address"
+    >
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Password"
+    >
+
+    <button id="loginBtn" class="btn rgb" style="width:100%;margin-top:10px">
+      Login
+    </button>
+
+    <button id="registerBtn" class="btn" style="width:100%;margin-top:10px">
+      Create account
+    </button>
+
+    <div id="authStatus" class="status"></div>
+  </div>
+</section>
+
+
+<!-- MAIN APP -->
+<section id="appPage" class="main hidden">
+
+  <aside id="sidebar" class="sidebar">
+
+    <div class="side-title">Ohid AI</div>
+
+    <button id="newChatBtn" class="btn rgb">
+      + New Chat
+    </button>
+
+    <div id="userInfo" class="user-info"></div>
+
+    <input
+      id="historySearch"
+      class="history-search"
+      type="search"
+      placeholder="পুরোনো chat খুঁজুন..."
+    >
+
+    <div id="history" class="history"></div>
+
+    <button id="logoutBtn" class="btn btn-danger">
+      Logout
+    </button>
+
+  </aside>
+
+
+  <main class="chat-area">
+
+    <header class="topbar">
+      <button id="menuBtn" class="btn mobile-menu">☰</button>
+
+      <div class="topbar-title">Ohid AI Chat</div>
+
+      <button id="topNewChatBtn" class="btn">
+        New Chat
+      </button>
+    </header>
+
+
+    <div id="chatBox" class="chat-box">
+      <div id="welcome" class="welcome">
+        <h2>Ohid AI-তে স্বাগতম!</h2>
+        <p>নতুন chat শুরু করতে নিচে message লিখুন।</p>
+      </div>
+    </div>
+
+
+    <div id="status" class="status"></div>
+
+
+    <div class="composer">
+      <div class="composer-inner">
+
+        <textarea
+          id="messageInput"
+          placeholder="Ohid AI-কে message লিখুন..."
+          rows="1"
+        ></textarea>
+
+        <button id="sendBtn" class="btn rgb">
+          Send
+        </button>
+
+      </div>
+    </div>
+
+  </main>
+</section>
+
 
 <script>
+/* =================================
+   SUPABASE CONFIG
+================================= */
+
+const SUPABASE_URL =
+  "https://foqgepqsuszruxnlxqnx.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_LA10FLwPQmZkxkOIdY4ZGQ_NSQvFzEW";
+
+const db = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+
+/* =================================
+   GROQ CONFIG
+================================= */
+
 const GROQ_API_KEY = "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";
 
-const API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "openai/gpt-oss-20b";
+const GROQ_URL =
+  "https://api.groq.com/openai/v1/chat/completions";
+
+const MODEL = "llama-3.3-70b-versatile";
+
+
+/* =================================
+   ELEMENTS
+================================= */
+
+const authPage = document.getElementById("authPage");
+const appPage = document.getElementById("appPage");
+
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+
+const loginBtn = document.getElementById("loginBtn");
+const registerBtn = document.getElementById("registerBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const authStatus = document.getElementById("authStatus");
+const statusText = document.getElementById("status");
+
+const userInfo = document.getElementById("userInfo");
+const history = document.getElementById("history");
+const historySearch = document.getElementById("historySearch");
 
 const chatBox = document.getElementById("chatBox");
+const welcome = document.getElementById("welcome");
+
 const messageInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
-const typing = document.getElementById("typing");
 
-let conversation = [
-    {
-        role: "system",
-        content:
-        "তোমার নাম Ohid bby Ai। ব্যবহারকারী যদি জিজ্ঞেস করে তোমাকে কে তৈরি করেছে, বলবে: আমাকে Ohid তৈরি করেছে। সবসময় বাংলায় উত্তর দেবে, বন্ধুসুলভভাবে কথা বলবে এবং সংক্ষিপ্ত উত্তর দেবে।"
-    }
-];
+const newChatBtn = document.getElementById("newChatBtn");
+const topNewChatBtn = document.getElementById("topNewChatBtn");
 
-function addMessage(text, type){
-    const message = document.createElement("div");
-    message.className = "message " + type;
-    message.textContent = text;
+const sidebar = document.getElementById("sidebar");
+const menuBtn = document.getElementById("menuBtn");
 
-    chatBox.appendChild(message);
-    chatBox.scrollTop = chatBox.scrollHeight;
+
+/* =================================
+   STATE
+================================= */
+
+let currentUser = null;
+let currentChatId = null;
+let currentMessages = [];
+let allChats = [];
+
+
+/* =================================
+   HELPERS
+================================= */
+
+function showAuthMessage(message, error = false){
+  authStatus.textContent = message;
+  authStatus.style.color = error ? "#ff7777" : "#00ffff";
 }
 
-function showTyping(show){
-    typing.classList.toggle("show", show);
-    chatBox.scrollTop = chatBox.scrollHeight;
+function showStatus(message){
+  statusText.textContent = message;
+
+  if(message){
+    setTimeout(() => {
+      statusText.textContent = "";
+    }, 3000);
+  }
 }
 
-function autoResize(){
-    messageInput.style.height = "auto";
-    messageInput.style.height =
-        Math.min(messageInput.scrollHeight, 120) + "px";
+function setAuthLoading(loading){
+  loginBtn.disabled = loading;
+  registerBtn.disabled = loading;
 }
 
-function speakText(text){
-    if(!("speechSynthesis" in window)){
-        return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    const speech = new SpeechSynthesisUtterance(text);
-
-    speech.lang = "bn-BD";
-    speech.rate = 0.92;
-    speech.pitch = 1;
-    speech.volume = 1;
-
-    const voices = window.speechSynthesis.getVoices();
-
-    const banglaVoice = voices.find(voice =>
-        voice.lang.toLowerCase().includes("bn")
-    );
-
-    if(banglaVoice){
-        speech.voice = banglaVoice;
-    }
-
-    window.speechSynthesis.speak(speech);
+function escapeHTML(text){
+  return String(text)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
-async function sendMessage(){
-    const text = messageInput.value.trim();
-
-    if(!text){
-        return;
-    }
-
-    if(GROQ_API_KEY === "YOUR_GROQ_API_KEY"){
-        addMessage("প্রথমে HTML কোডে নিজের Groq API key বসাও।", "system");
-        return;
-    }
-
-    addMessage(text, "user");
-
-    conversation.push({
-        role:"user",
-        content:text
-    });
-
-    messageInput.value = "";
-    autoResize();
-
-    sendBtn.disabled = true;
-    showTyping(true);
-
-    try{
-        const response = await fetch(API_URL, {
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json",
-                "Authorization":"Bearer " + GROQ_API_KEY
-            },
-            body:JSON.stringify({
-                model:MODEL,
-                messages:conversation,
-                temperature:0.7,
-                max_tokens:700
-            })
-        });
-
-        const data = await response.json();
-
-        if(!response.ok){
-            throw new Error(
-                data.error?.message || "API request failed"
-            );
-        }
-
-        const reply =
-            data.choices?.[0]?.message?.content ||
-            "দুঃখিত, কোনো উত্তর পাওয়া যায়নি।";
-
-        conversation.push({
-            role:"assistant",
-            content:reply
-        });
-
-        showTyping(false);
-        addMessage(reply, "ai");
-
-        // AI reply আসার সাথে সাথে অটো ভয়েস চালু হবে
-        speakText(reply);
-
-    }catch(error){
-        showTyping(false);
-        addMessage(
-            "দুঃখিত, সমস্যা হয়েছে: " + error.message,
-            "system"
-        );
-    }
-
-    sendBtn.disabled = false;
-    messageInput.focus();
+function makeTitle(text){
+  return text.trim().slice(0,70) || "New Chat";
 }
 
-sendBtn.addEventListener("click", sendMessage);
 
-messageInput.addEventListener("input", autoResize);
+/* =================================
+   AUTHENTICATION
+================================= */
 
-// Enter চাপলে মেসেজ যাবে না; নতুন লাইন হবে
-messageInput.addEventListener("keydown", function(event){
-    if(event.key === "Enter"){
-        event.stopPropagation();
-    }
+loginBtn.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  if(!email || !password){
+    showAuthMessage("Email এবং password দিন", true);
+    return;
+  }
+
+  setAuthLoading(true);
+  showAuthMessage("Login হচ্ছে...");
+
+  const { error } = await db.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    showAuthMessage(error.message, true);
+  }else{
+    showAuthMessage("Login সফল হয়েছে");
+  }
+
+  setAuthLoading(false);
 });
 
-window.speechSynthesis?.getVoices();
 
-messageInput.focus();
-autoResize();
+registerBtn.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  if(!email || !password){
+    showAuthMessage("Email এবং password দিন", true);
+    return;
+  }
+
+  if(password.length < 6){
+    showAuthMessage(
+      "Password কমপক্ষে ৬ অক্ষরের হতে হবে",
+      true
+    );
+    return;
+  }
+
+  setAuthLoading(true);
+  showAuthMessage("Account তৈরি হচ্ছে...");
+
+  const { error } = await db.auth.signUp({
+    email,
+    password
+  });
+
+  if(error){
+    showAuthMessage(error.message, true);
+  }else{
+    showAuthMessage(
+      "Account তৈরি হয়েছে। Email confirmation চালু থাকলে email verify করুন।"
+    );
+  }
+
+  setAuthLoading(false);
+});
+
+
+logoutBtn.addEventListener("click", async () => {
+  await db.auth.signOut();
+});
+
+
+db.auth.onAuthStateChange((_event, session) => {
+  if(session && session.user){
+    currentUser = session.user;
+    openApp();
+  }else{
+    currentUser = null;
+    closeApp();
+  }
+});
+
+
+async function checkSession(){
+  const { data } = await db.auth.getSession();
+
+  if(data.session && data.session.user){
+    currentUser = data.session.user;
+    openApp();
+  }else{
+    closeApp();
+  }
+}
+
+function openApp(){
+  authPage.classList.add("hidden");
+  appPage.classList.remove("hidden");
+
+  userInfo.textContent =
+    "Logged in as: " + (currentUser.email || "User");
+
+  loadChats();
+}
+
+function closeApp(){
+  authPage.classList.remove("hidden");
+  appPage.classList.add("hidden");
+
+  currentChatId = null;
+  currentMessages = [];
+}
+
+
+/* =================================
+   CHAT HISTORY
+================================= */
+
+async function loadChats(){
+  if(!currentUser) return;
+
+  history.innerHTML =
+    "<div class='status'>Loading chats...</div>";
+
+  const { data, error } = await db
+    .from("chats")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .order("updated_at", { ascending:false });
+
+  if(error){
+    history.innerHTML = "";
+    showStatus(error.message);
+    return;
+  }
+
+  allChats = data || [];
+  renderHistory(allChats);
+}
+
+function renderHistory(chats){
+  history.innerHTML = "";
+
+  if(!chats.length){
+    history.innerHTML =
+      "<div class='status'>এখনো কোনো পুরোনো chat নেই</div>";
+    return;
+  }
+
+  chats.forEach(chat => {
+    const item = document.createElement("div");
+
+    item.className = "history-item";
+
+    if(chat.id === currentChatId){
+      item.classList.add("active");
+    }
+
+    item.textContent = chat.title || "New Chat";
+
+    item.addEventListener("click", () => {
+      loadChat(chat);
+      sidebar.classList.remove("open");
+    });
+
+    history.appendChild(item);
+  });
+}
+
+historySearch.addEventListener("input", () => {
+  const query = historySearch.value.toLowerCase().trim();
+
+  const filtered = allChats.filter(chat =>
+    (chat.title || "").toLowerCase().includes(query)
+  );
+
+  renderHistory(filtered);
+});
+
+
+function loadChat(chat){
+  currentChatId = chat.id;
+
+  currentMessages = Array.isArray(chat.messages)
+    ? chat.messages
+    : [];
+
+  renderMessages();
+  renderHistory(allChats);
+}
+
+
+function startNewChat(){
+  currentChatId = null;
+  currentMessages = [];
+
+  renderMessages();
+  messageInput.focus();
+  sidebar.classList.remove("open");
+}
+
+newChatBtn.addEventListener("click", startNewChat);
+topNewChatBtn.addEventListener("click", startNewChat);
+
+menuBtn.addEventListener("click", () => {
+  sidebar.classList.toggle("open");
+});
+
+
+/* =================================
+   MESSAGE UI
+================================= */
+
+function renderMessages(){
+  chatBox.innerHTML = "";
+
+  if(!currentMessages.length){
+    chatBox.appendChild(welcome);
+    welcome.classList.remove("hidden");
+    return;
+  }
+
+  welcome.classList.add("hidden");
+
+  currentMessages.forEach(message => {
+    addMessageToUI(
+      message.role,
+      message.content,
+      false
+    );
+  });
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function addMessageToUI(role, content, scroll = true){
+  const message = document.createElement("div");
+
+  message.className =
+    "message " +
+    (role === "user" ? "user rgb" : "ai");
+
+  const name = document.createElement("div");
+
+  name.className = "message-name";
+
+  name.textContent =
+    role === "user" ? "You" : "Ohid AI";
+
+  const text = document.createElement("div");
+
+  text.innerHTML = escapeHTML(content);
+
+  message.appendChild(name);
+  message.appendChild(text);
+
+  chatBox.appendChild(message);
+
+  if(scroll){
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+}
+
+
+/* =================================
+   SAVE CHAT TO SUPABASE
+================================= */
+
+async function saveCurrentChat(){
+  if(!currentUser || !currentMessages.length){
+    return;
+  }
+
+  const firstUserMessage =
+    currentMessages.find(m => m.role === "user");
+
+  const title = makeTitle(
+    firstUserMessage
+      ? firstUserMessage.content
+      : "New Chat"
+  );
+
+  if(currentChatId){
+
+    const { error } = await db
+      .from("chats")
+      .update({
+        title,
+        messages: currentMessages,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", currentChatId)
+      .eq("user_id", currentUser.id);
+
+    if(error){
+      showStatus("Chat save হয়নি: " + error.message);
+    }
+
+  }else{
+
+    const { data, error } = await db
+      .from("chats")
+      .insert({
+        user_id: currentUser.id,
+        title,
+        messages: currentMessages
+      })
+      .select()
+      .single();
+
+    if(error){
+      showStatus("Chat save হয়নি: " + error.message);
+      return;
+    }
+
+    currentChatId = data.id;
+  }
+
+  await loadChats();
+}
+
+
+/* =================================
+   AI REQUEST
+================================= */
+
+async function askAI(){
+  const prompt = messageInput.value.trim();
+
+  if(!prompt) return;
+
+  if(
+    !GROQ_API_KEY ||
+    GROQ_API_KEY === "তোমার_GROQ_API_KEY_এখানে_বসাও"
+  ){
+    showStatus("HTML-এর মধ্যে Groq API key বসাও");
+    return;
+  }
+
+  messageInput.value = "";
+  messageInput.style.height = "48px";
+
+  currentMessages.push({
+    role:"user",
+    content:prompt
+  });
+
+  addMessageToUI("user", prompt);
+
+  sendBtn.disabled = true;
+  messageInput.disabled = true;
+
+  showStatus("Ohid AI উত্তর তৈরি করছে...");
+
+  try{
+
+    const response = await fetch(GROQ_URL, {
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + GROQ_API_KEY
+      },
+
+      body:JSON.stringify({
+        model:MODEL,
+
+        messages:[
+          {
+            role:"system",
+            content:
+              "তুমি Ohid AI। ব্যবহারকারীকে বাংলায় বা ব্যবহারকারীর ভাষায় উত্তর দেবে। তোমার নাম Ohid AI।"
+          },
+          ...currentMessages
+        ],
+
+        temperature:0.7,
+        max_tokens:1024
+      })
+    });
+
+    const result = await response.json();
+
+    if(!response.ok){
+      throw new Error(
+        result.error?.message || "AI request failed"
+      );
+    }
+
+    const answer =
+      result.choices?.[0]?.message?.content ||
+      "দুঃখিত, কোনো উত্তর পাওয়া যায়নি।";
+
+    currentMessages.push({
+      role:"assistant",
+      content:answer
+    });
+
+    addMessageToUI("assistant", answer);
+
+    await saveCurrentChat();
+
+    if("speechSynthesis" in window){
+      const voice = new SpeechSynthesisUtterance(answer);
+
+      voice.lang = "bn-BD";
+
+      speechSynthesis.cancel();
+      speechSynthesis.speak(voice);
+    }
+
+  }catch(error){
+    showStatus(error.message);
+  }
+
+  sendBtn.disabled = false;
+  messageInput.disabled = false;
+  messageInput.focus();
+}
+
+
+/* =================================
+   SEND
+================================= */
+
+sendBtn.addEventListener("click", askAI);
+
+/*
+  Enter চাপলে newline হবে।
+  Send button চাপলে message যাবে।
+*/
+
+messageInput.addEventListener("input", () => {
+  messageInput.style.height = "48px";
+
+  messageInput.style.height =
+    Math.min(messageInput.scrollHeight,150) + "px";
+});
+
+
+/* =================================
+   START
+================================= */
+
+checkSession();
 </script>
 
 </body>
